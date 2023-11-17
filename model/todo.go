@@ -14,12 +14,12 @@ type (
 
 	// A CreateTODORequest expresses ...
 	CreateTODORequest struct{
-		Subject string
-		Description string
+		Subject string `json:"subject"`
+		Description string `json:"description"`
 	}
 	// A CreateTODOResponse expresses ...
 	CreateTODOResponse struct{
-		Properties TODO
+		Todo TODO `json:"todo"`
 	}
 
 	// A ReadTODORequest expresses ...
