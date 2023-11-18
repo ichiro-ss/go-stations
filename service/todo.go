@@ -21,11 +21,15 @@ func NewTODOService(db *sql.DB) *TODOService {
 
 // CreateTODO creates a TODO on DB.
 func (s *TODOService) CreateTODO(ctx context.Context, subject, description string) (*model.TODO, error) {
-	var todo *model.TODO
+	var todo model.TODO
 	const (
 		insert  = `INSERT INTO todos(subject, description) VALUES(?, ?)`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
+
+	// if subject == "" {
+	// 	return nil, sqlite3.Error
+	// }
 
 	res, err := s.db.ExecContext(ctx, insert, subject, description)
 	if err != nil {
@@ -41,7 +45,7 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 		return nil, err
 	}
 	todo.ID = int(created_id)
-	return todo, nil
+	return &todo, nil
 }
 
 // ReadTODO reads TODOs on DB.
