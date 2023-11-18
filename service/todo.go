@@ -28,7 +28,7 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	)
 
 	res, err := s.db.ExecContext(ctx, insert, subject, description)
-	fmt.Println(res)
+	fmt.Println("here", res)
 	if err != nil {
 		return nil, err
 	}
