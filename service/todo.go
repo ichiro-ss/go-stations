@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/TechBowl-japan/go-stations/model"
 )
@@ -25,6 +26,13 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 		insert  = `INSERT INTO todos(subject, description) VALUES(?, ?)`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
+
+	res, err := s.db.ExecContext(ctx, insert, subject, description)
+	fmt.Println(res)
+	if err != nil {
+		return nil, err
+	}
+	// row := s.db.QueryRowContext(ctx, confirm, id)
 
 	return nil, nil
 }
