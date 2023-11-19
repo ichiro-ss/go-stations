@@ -76,10 +76,14 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if present && len(prevID) != 0 {
 			readTodoReq.PrevID, _ = strconv.ParseInt(prevID[0], 10, 64)
 		}
+
 		Size, present := query["size"]
 		if present && len(Size) != 0 {
 			readTodoReq.Size, _ = strconv.ParseInt(Size[0], 10, 64)
+		} else {
+			readTodoReq.Size = 5
 		}
+
 		readTodoRes, err := h.Read(r.Context(), &readTodoReq)
 		if err != nil {
 			log.Println(err)
