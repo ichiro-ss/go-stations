@@ -94,6 +94,21 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// DELETE
+	if r.Method == http.MethodDelete {
+		var deleteTodoReq model.DeleteTODORequest
+		if err := json.NewDecoder(r.Body).Decode(&deleteTodoReq); err != nil {
+			log.Println(err)
+			return
+		}
+		if len(deleteTodoReq.IDs) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		_, err := h.Delete(r.Context(), &deleteTodoReq)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
 }
 
 // Create handles the endpoint that creates the TODO.
@@ -129,6 +144,9 @@ func (h *TODOHandler) Update(ctx context.Context, req *model.UpdateTODORequest) 
 
 // Delete handles the endpoint that deletes the TODOs.
 func (h *TODOHandler) Delete(ctx context.Context, req *model.DeleteTODORequest) (*model.DeleteTODOResponse, error) {
-	_ = h.svc.DeleteTODO(ctx, nil)
+	err := h.svc.DeleteTODO(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 	return &model.DeleteTODOResponse{}, nil
 }
