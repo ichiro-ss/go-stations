@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 	"database/sql"
-	"time"
+	"fmt"
+	"strings"
 
 	"github.com/TechBowl-japan/go-stations/model"
 )
@@ -101,7 +102,7 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 		return nil, err
 	}
 	if num, err := res.RowsAffected(); num == 0 || err != nil {
-		return nil, &model.ErrNotFound{time.Now(), "not found"}
+		return nil, &model.ErrNotFound{}
 	}
 	row := s.db.QueryRowContext(ctx, confirm, id)
 	if err = row.Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt); err != nil {
@@ -115,6 +116,30 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 // DeleteTODO deletes TODOs on DB by ids.
 func (s *TODOService) DeleteTODO(ctx context.Context, ids []int64) error {
 	const deleteFmt = `DELETE FROM todos WHERE id IN (?%s)`
+	var q string
+	if len(ids) == 0 {
+		return nil
+	} else {
+		q = fmt.Sprintf(deleteFmt, strings.Repeat(",?", len(ids)-1))
+	}
 
+	idSlice := make([]interface{}, len(ids))
+	for i, id := range ids {
+		idSlice[i] = id
+	}
+
+	res, err := s.db.ExecContext(ctx, q, idSlice...)
+	if err != nil {
+		return err
+	}
+
+	numRows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if numRows == 0 {
+		return &model.ErrNotFound{}
+	}
 	return nil
 }
