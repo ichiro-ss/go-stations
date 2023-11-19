@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/TechBowl-japan/go-stations/model"
 )
@@ -44,7 +45,7 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	if err = row.Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt); err != nil {
 		return nil, err
 	}
-	todo.ID = int(created_id)
+	todo.ID = created_id
 	return &todo, nil
 }
 
@@ -60,12 +61,26 @@ func (s *TODOService) ReadTODO(ctx context.Context, prevID, size int64) ([]*mode
 
 // UpdateTODO updates the TODO on DB.
 func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, description string) (*model.TODO, error) {
+	var todo model.TODO
 	const (
 		update  = `UPDATE todos SET subject = ?, description = ? WHERE id = ?`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
 
-	return nil, nil
+	res, err := s.db.ExecContext(ctx, update, subject, description, id)
+	if err != nil {
+		return nil, err
+	}
+	if num, err := res.RowsAffected(); num == 0 || err != nil {
+		return nil, &model.ErrNotFound{time.Now(), "not found"}
+	}
+	row := s.db.QueryRowContext(ctx, confirm, id)
+	if err = row.Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt); err != nil {
+		return nil, err
+	}
+	todo.ID = id
+
+	return &todo, nil
 }
 
 // DeleteTODO deletes TODOs on DB by ids.
