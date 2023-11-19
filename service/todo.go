@@ -28,7 +28,7 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	)
 
 	// if subject == "" {
-	// 	return nil, sqlite3.Error
+	// 	return nil, err.(sqlite3.ErrError)
 	// }
 
 	res, err := s.db.ExecContext(ctx, insert, subject, description)
